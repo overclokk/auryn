@@ -25,13 +25,16 @@
         }
     ],
     "require": {
-        "php": ">=7.1",
-        "friendsofphp/proxy-manager-lts": "^1.0"
+        "php": ">=7.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^7 || ^8",
         "friendsofphp/php-cs-fixer": "^2",
+        "friendsofphp/proxy-manager-lts": "^1.0",
         "athletic/athletic": "~0.1"
+    },
+    "suggest": {
+        "friendsofphp/proxy-manager-lts": "Required for support for lazy-loading proxies."
     },
     "autoload": {
         "psr-4": {
