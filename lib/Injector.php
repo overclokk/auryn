@@ -1,5 +1,5 @@
 <?php
-declare (strict_types=1);
+declare(strict_types=1);
 
 namespace Auryn;
 
@@ -67,7 +67,7 @@ class Injector
      * @param string $name The class (or alias) whose constructor arguments we wish to define
      * @param array $args An array mapping parameter names to values/instructions
      *
-	 * @return self
+     * @return self
      */
     public function define($name, array $args)
     {
@@ -255,7 +255,7 @@ class Injector
 
     /**
      * Delegate the creation of $name instances to the specified callable, receiving arguments based on the callables
-	 * signature.
+     * signature.
      *
      * @param string $name
      * @param mixed $callableOrMethodStr Any callable or provisionable invokable method
@@ -264,9 +264,9 @@ class Injector
      */
     public function delegate($name, $callableOrMethodStr)
     {
-		if (!$this->isExecutable($callableOrMethodStr)) {
-			$this->generateInvalidCallableError($callableOrMethodStr);
-		}
+        if (!$this->isExecutable($callableOrMethodStr)) {
+            $this->generateInvalidCallableError($callableOrMethodStr);
+        }
 
         $normalizedName = $this->normalizeName($name);
         $this->delegates[$normalizedName] = $callableOrMethodStr;
@@ -320,26 +320,26 @@ class Injector
         }
     }
 
-	/**
-	 * Proxy the specified class across the Injector context.
-	 *
-	 * @param string $name The class to proxy
-	 *
-	 * @param $callableOrMethodStr
-	 * @return Injector
-	 * @throws ConfigException
-	 */
-	public function proxy(string $name, $callableOrMethodStr)
-	{
-		if (!$this->isExecutable($callableOrMethodStr)) {
-			$this->generateInvalidCallableError($callableOrMethodStr);
-		}
+    /**
+     * Proxy the specified class across the Injector context.
+     *
+     * @param string $name The class to proxy
+     *
+     * @param $callableOrMethodStr
+     * @return Injector
+     * @throws ConfigException
+     */
+    public function proxy(string $name, $callableOrMethodStr)
+    {
+        if (!$this->isExecutable($callableOrMethodStr)) {
+            $this->generateInvalidCallableError($callableOrMethodStr);
+        }
 
-		list($className, $normalizedName) = $this->resolveAlias($name);
-		$this->proxies[$normalizedName] = $callableOrMethodStr;
+        list($className, $normalizedName) = $this->resolveAlias($name);
+        $this->proxies[$normalizedName] = $callableOrMethodStr;
 
-		return $this;
-	}
+        return $this;
+    }
 
     /**
      * Instantiate/provision a class instance
@@ -381,13 +381,13 @@ class Injector
                 $reflectionFunction = $executable->getCallableReflection();
                 $args = $this->provisionFuncArgs($reflectionFunction, $args, null, $className);
                 $obj = call_user_func_array(array($executable, '__invoke'), $args);
-			} elseif (isset($this->proxies[$normalizedClass])) {
-				if (isset($this->prepares[$normalizedClass])) {
-					$this->preparesProxy[$normalizedClass] = $this->prepares[$normalizedClass];
-				}
-				$obj = $this->resolveProxy($className, $normalizedClass, $args);
-				unset($this->prepares[$normalizedClass]);
-			} else {
+            } elseif (isset($this->proxies[$normalizedClass])) {
+                if (isset($this->prepares[$normalizedClass])) {
+                    $this->preparesProxy[$normalizedClass] = $this->prepares[$normalizedClass];
+                }
+                $obj = $this->resolveProxy($className, $normalizedClass, $args);
+                unset($this->prepares[$normalizedClass]);
+            } else {
                 $obj = $this->provisionInstance($className, $normalizedClass, $args);
             }
 
@@ -406,33 +406,34 @@ class Injector
         return $obj;
     }
 
-	private function resolveProxy(string $className, string $normalizedClass, array $args)
-	{
-		$callback = function ()  use ($className, $normalizedClass, $args) {
-			return $this->buildWrappedObject( $className, $normalizedClass, $args );
-		};
+    private function resolveProxy(string $className, string $normalizedClass, array $args)
+    {
+        $callback = function () use ($className, $normalizedClass, $args) {
+            return $this->buildWrappedObject($className, $normalizedClass, $args);
+        };
 
-		$proxy = $this->proxies[$normalizedClass];
+        $proxy = $this->proxies[$normalizedClass];
 
-		return $proxy( $className, $callback );
-	}
+        return $proxy($className, $callback);
+    }
 
-	/**
-	 * @param string $className
-	 * @param string $normalizedClass
-	 * @param array $args
-	 * @return mixed|object
-	 * @throws InjectionException
-	 */
-	private function buildWrappedObject( $className, $normalizedClass, array $args ) {
-		$wrappedObject = $this->provisionInstance( $className, $normalizedClass, $args );
+    /**
+     * @param string $className
+     * @param string $normalizedClass
+     * @param array $args
+     * @return mixed|object
+     * @throws InjectionException
+     */
+    private function buildWrappedObject($className, $normalizedClass, array $args)
+    {
+        $wrappedObject = $this->provisionInstance($className, $normalizedClass, $args);
 
-		if ( isset( $this->preparesProxy[ $normalizedClass ] ) ) {
-			$this->prepares[ $normalizedClass ] = $this->preparesProxy[ $normalizedClass ];
-		}
+        if (isset($this->preparesProxy[ $normalizedClass ])) {
+            $this->prepares[ $normalizedClass ] = $this->preparesProxy[ $normalizedClass ];
+        }
 
-		return $this->prepareInstance( $wrappedObject, $normalizedClass );
-	}
+        return $this->prepareInstance($wrappedObject, $normalizedClass);
+    }
 
     private function provisionInstance($className, $normalizedClass, array $definition)
     {
@@ -800,28 +801,28 @@ class Injector
         return $executableStruct;
     }
 
-	/**
-	 * @param $callableOrMethodStr
-	 *
-	 * @throws ConfigException
-	 */
-	private function generateInvalidCallableError($callableOrMethodStr)
-	{
-		$errorDetail = '';
-		if (is_string($callableOrMethodStr)) {
-			$errorDetail = " but received '$callableOrMethodStr'";
-		} elseif (is_array($callableOrMethodStr) &&
-			count($callableOrMethodStr) === 2 &&
-			array_key_exists(0, $callableOrMethodStr) &&
-			array_key_exists(1, $callableOrMethodStr)
-		) {
-			if (is_string($callableOrMethodStr[0]) && is_string($callableOrMethodStr[1])) {
-				$errorDetail = " but received ['" . $callableOrMethodStr[0] . "', '" . $callableOrMethodStr[1] . "']";
-			}
-		}
-		throw new ConfigException(
-			sprintf(self::M_DELEGATE_ARGUMENT, __CLASS__, $errorDetail),
-			self::E_DELEGATE_ARGUMENT
-		);
-	}
+    /**
+     * @param $callableOrMethodStr
+     *
+     * @throws ConfigException
+     */
+    private function generateInvalidCallableError($callableOrMethodStr)
+    {
+        $errorDetail = '';
+        if (is_string($callableOrMethodStr)) {
+            $errorDetail = " but received '$callableOrMethodStr'";
+        } elseif (is_array($callableOrMethodStr) &&
+            count($callableOrMethodStr) === 2 &&
+            array_key_exists(0, $callableOrMethodStr) &&
+            array_key_exists(1, $callableOrMethodStr)
+        ) {
+            if (is_string($callableOrMethodStr[0]) && is_string($callableOrMethodStr[1])) {
+                $errorDetail = " but received ['" . $callableOrMethodStr[0] . "', '" . $callableOrMethodStr[1] . "']";
+            }
+        }
+        throw new ConfigException(
+            sprintf(self::M_DELEGATE_ARGUMENT, __CLASS__, $errorDetail),
+            self::E_DELEGATE_ARGUMENT
+        );
+    }
 }
