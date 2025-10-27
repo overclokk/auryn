@@ -1,8 +1,9 @@
 {
-    "name": "rdlowrey/auryn",
-    "homepage": "https://github.com/rdlowrey/auryn",
-    "description": "Auryn is a dependency injector for bootstrapping object-oriented PHP applications.",
+    "name": "overclokk/auryn",
+    "description": "Fork of rdlowrey/auryn with proxy support thanks to Ocramius/ProxyManager|FriendsOfPHP/proxy-manager-lts - Auryn is a dependency injector for bootstrapping object-oriented PHP applications.",
     "keywords": ["dependency injection", "dic", "ioc"],
+    "homepage": "https://github.com/overclokk/auryn",
+    "type": "library",
     "license": "MIT",
     "authors": [
         {
@@ -22,8 +23,19 @@
             "email": "Danack@basereality.com",
             "homepage": "http://www.basereality.com",
             "role": "Developer"
+        },
+        {
+            "name": "Enea Overclokk",
+            "email": "info@overclokk.net",
+            "homepage": "https://www.italystrap.com",
+            "role": "Developer"
         }
     ],
+    "replace": {
+        "rdlowrey/auryn": "^1.4"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": ">=7.1"
     },
@@ -48,9 +60,13 @@
         "files": ["test/fixtures.php"]
     },
     "scripts": {
-        "test": "vendor/bin/phpunit --coverage-text",
-        "cs": "vendor/bin/php-cs-fixer fix --dry-run --diff -v",
-        "cs:fix": "vendor/bin/php-cs-fixer fix"
+        "test": "@php vendor/bin/phpunit --coverage-text",
+        "cs": "@php vendor/bin/php-cs-fixer fix --dry-run --diff -v",
+        "cs:fix": "@php vendor/bin/php-cs-fixer fix"
+    },
+    "support": {
+        "issues": "https://github.com/overclokk/auryn/issues",
+        "source": "https://github.com/overclokk/auryn"
     },
     "config": {
         "allow-plugins": {
