@@ -9,8 +9,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libzip-dev \
     libonig-dev \
     && docker-php-ext-install zip \
-    && pecl install pcov \
-    && docker-php-ext-enable pcov \
+    && pecl install pcov apcu \
+    && docker-php-ext-enable pcov apcu \
+    && echo 'apc.enable_cli=1' > /usr/local/etc/php/conf.d/apcu-cli.ini \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 WORKDIR /app

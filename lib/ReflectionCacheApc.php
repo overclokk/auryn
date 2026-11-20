@@ -27,14 +27,15 @@ class ReflectionCacheApc implements ReflectionCache
             return $localData;
         }
 
-        $success = null; // stupid by-ref parameter that scrutinizer complains about
-        $data    = apc_fetch($key, $success);
+        $success = false;
+        $data = apcu_fetch($key, $success);
+
         return $success ? $data : false;
     }
 
     public function store(string $key, mixed $data): void
     {
         $this->localCache->store($key, $data);
-        apc_store($key, $data, $this->timeToLive);
+        apcu_store($key, $data, $this->timeToLive);
     }
 }

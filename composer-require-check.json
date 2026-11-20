@@ -1,7 +1,7 @@
 {
   "symbol-whitelist" : [
-    "apc_fetch",
-    "apc_store",
+    "apcu_fetch",
+    "apcu_store",
     "array",
     "false",
     "null",

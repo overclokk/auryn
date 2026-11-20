@@ -47,7 +47,8 @@
         "rector/rector": "^2.0"
     },
     "suggest": {
-        "friendsofphp/proxy-manager-lts": "Required for support for lazy-loading proxies."
+        "friendsofphp/proxy-manager-lts": "Required for support for lazy-loading proxies.",
+        "ext-apcu": "Required by ReflectionCacheApc to share the reflection cache between requests."
     },
     "autoload": {
         "psr-4": {
