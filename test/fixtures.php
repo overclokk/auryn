@@ -757,3 +757,23 @@ class ThrowsExceptionInConstructor
         throw new \Exception('Exception in constructor');
     }
 }
+
+class ExtendedArrayObject extends \ArrayObject
+{
+}
+
+class ExtendedExtendedArrayObject extends ExtendedArrayObject
+{
+}
+
+class NullableInterfaceThenScalar
+{
+    public $dependency;
+    public $value;
+
+    public function __construct(DepInterface $dependency = null, $value = 5)
+    {
+        $this->dependency = $dependency;
+        $this->value = $value;
+    }
+}

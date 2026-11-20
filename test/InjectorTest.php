@@ -1239,4 +1239,28 @@ class InjectorTest extends TestCase
 
         $injector->make(ThrowsExceptionInConstructor::class);
     }
+
+    /**
+     * Internal classes expose optional constructor parameters without a reflectable default value.
+     * See https://github.com/rdlowrey/auryn/issues/129
+     */
+    public function testMakesExtensionsOfInternalClassesWithOptionalConstructorParameters()
+    {
+        $injector = new Injector();
+
+        $obj = $injector->make(ExtendedExtendedArrayObject::class);
+
+        $this->assertInstanceOf(\ArrayObject::class, $obj);
+    }
+
+    public function testOptionalParameterWithNullDefaultKeepsTheFollowingArgumentsInPlace()
+    {
+        $injector = new Injector();
+        $injector->define(NullableInterfaceThenScalar::class, [':value' => 10]);
+
+        $obj = $injector->make(NullableInterfaceThenScalar::class);
+
+        $this->assertNull($obj->dependency);
+        $this->assertSame(10, $obj->value);
+    }
 }

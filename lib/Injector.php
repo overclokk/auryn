@@ -516,10 +516,11 @@ class Injector
             } elseif (!$arg = $this->buildArgFromTypeHint($reflFunc, $reflParam)) {
                 $arg = $this->buildArgFromReflParam($reflParam, $className);
 
-                if ($arg === null && PHP_VERSION_ID >= 50600 && $reflParam->isVariadic()) {
-                    // buildArgFromReflParam might return null in case the parameter is optional
-                    // in case of variadics, the parameter is optional, but null might not be allowed
-                    continue;
+                if ($arg === null && $this->isOmittableParameter($reflParam)) {
+                    // Variadics and optional parameters without a reflectable default value
+                    // (internal classes, see https://github.com/rdlowrey/auryn/issues/129)
+                    // might not accept null: stop here, the following parameters are optional too.
+                    break;
                 }
             }
 
@@ -527,6 +528,12 @@ class Injector
         }
 
         return $args;
+    }
+
+    private function isOmittableParameter(\ReflectionParameter $reflParam)
+    {
+        return $reflParam->isVariadic()
+            || ($reflParam->isOptional() && !$reflParam->isDefaultValueAvailable());
     }
 
     private function buildArgFromParamDefineArr($definition)
