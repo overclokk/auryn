@@ -777,3 +777,15 @@ class NullableInterfaceThenScalar
         $this->value = $value;
     }
 }
+
+class ClosureFactoryWithPrivateState
+{
+    private $secret = 'private-value';
+
+    public function makeClosure()
+    {
+        return function () {
+            return $this->secret;
+        };
+    }
+}

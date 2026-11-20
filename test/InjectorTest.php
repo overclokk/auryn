@@ -1263,4 +1263,12 @@ class InjectorTest extends TestCase
         $this->assertNull($obj->dependency);
         $this->assertSame(10, $obj->value);
     }
+
+    public function testExecutedClosureKeepsItsBoundObjectAndScope()
+    {
+        $injector = new Injector();
+        $closure = (new ClosureFactoryWithPrivateState())->makeClosure();
+
+        $this->assertSame('private-value', $injector->execute($closure));
+    }
 }

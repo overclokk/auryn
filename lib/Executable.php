@@ -43,26 +43,23 @@ class Executable
         }
 
         return $this->callableReflection->isClosure()
-            ? $this->invokeClosureCompat($reflection, $args)
+            ? $this->invokeClosure($reflection, $args)
             : $reflection->invokeArgs($args);
     }
 
     /**
-     * @TODO Remove this extra indirection when 5.3 support is dropped
+     * Rebind the closure, ReflectionFunction::invokeArgs() loses $this on old PHP versions.
      */
-    private function invokeClosureCompat($reflection, $args)
+    private function invokeClosure($reflection, $args)
     {
-        if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
-            $scope = $reflection->getClosureScopeClass();
-            $closure = \Closure::bind(
-                $reflection->getClosure(),
-                $reflection->getClosureThis(),
-                $scope ? $scope->name : null
-            );
-            return call_user_func_array($closure, $args);
-        } else {
-            return $reflection->invokeArgs($args);
-        }
+        $scope = $reflection->getClosureScopeClass();
+        $closure = \Closure::bind(
+            $reflection->getClosure(),
+            $reflection->getClosureThis(),
+            $scope ? $scope->name : null
+        );
+
+        return call_user_func_array($closure, $args);
     }
 
     public function getCallableReflection()
