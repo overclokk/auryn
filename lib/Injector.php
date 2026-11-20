@@ -579,10 +579,11 @@ class Injector
             $obj = null;
         } elseif ($reflParam->isDefaultValueAvailable()) {
             $normalizedName = $this->normalizeName($typeHint);
-            // Injector has been told explicitly how to make this type
+            // Injector has been told explicitly how to make this type.
+            // A type shared by name only is stored as null until it is made, so isset() would miss it.
             if (isset($this->aliases[$normalizedName]) ||
                 isset($this->delegates[$normalizedName]) ||
-                isset($this->shares[$normalizedName])) {
+                array_key_exists($normalizedName, $this->shares)) {
                 $obj = $this->make($typeHint);
             } else {
                 $obj = $reflParam->getDefaultValue();

@@ -1272,6 +1272,26 @@ class InjectorTest extends TestCase
         $this->assertSame('private-value', $injector->execute($closure));
     }
 
+    public function testOptionalParameterReceivesATypeSharedByNameOnly()
+    {
+        $injector = new Injector();
+        $injector->share(OptionalSharedDependency::class);
+
+        $consumer = $injector->make(ConsumerOfOptionalSharedDependency::class);
+
+        $this->assertInstanceOf(OptionalSharedDependency::class, $consumer->dependency);
+        $this->assertSame($injector->make(OptionalSharedDependency::class), $consumer->dependency);
+    }
+
+    public function testOptionalParameterKeepsItsDefaultWhenTheTypeIsNotConfigured()
+    {
+        $injector = new Injector();
+
+        $consumer = $injector->make(ConsumerOfOptionalSharedDependency::class);
+
+        $this->assertNull($consumer->dependency);
+    }
+
     public function testRequiredNullableParameterIsMade()
     {
         $injector = new Injector();

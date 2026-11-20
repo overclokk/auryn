@@ -794,6 +794,16 @@ class OptionalSharedDependency
 {
 }
 
+class ConsumerOfOptionalSharedDependency
+{
+    public $dependency;
+
+    public function __construct(OptionalSharedDependency $dependency = null)
+    {
+        $this->dependency = $dependency;
+    }
+}
+
 class ConsumerOfRequiredNullableDependency
 {
     public $dependency;
