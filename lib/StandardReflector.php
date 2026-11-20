@@ -28,8 +28,9 @@ class StandardReflector implements Reflector
         // php 8 deprecates getClass method
         if (PHP_VERSION_ID >= 80000) {
             $type = $param->getType();
-            if ($type instanceof \ReflectionNamedType && $type->isBuiltin()) {
-                return null;
+            if ($type instanceof \ReflectionNamedType) {
+                // getName() has no leading "?" for nullable types, unlike the string cast.
+                return $type->isBuiltin() ? null : $type->getName();
             }
 
             return $type ? (string) $type : null;

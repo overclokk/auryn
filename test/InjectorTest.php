@@ -1271,4 +1271,13 @@ class InjectorTest extends TestCase
 
         $this->assertSame('private-value', $injector->execute($closure));
     }
+
+    public function testRequiredNullableParameterIsMade()
+    {
+        $injector = new Injector();
+
+        $consumer = $injector->make(ConsumerOfRequiredNullableDependency::class);
+
+        $this->assertInstanceOf(OptionalSharedDependency::class, $consumer->dependency);
+    }
 }

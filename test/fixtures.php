@@ -789,3 +789,17 @@ class ClosureFactoryWithPrivateState
         };
     }
 }
+
+class OptionalSharedDependency
+{
+}
+
+class ConsumerOfRequiredNullableDependency
+{
+    public $dependency;
+
+    public function __construct(?OptionalSharedDependency $dependency)
+    {
+        $this->dependency = $dependency;
+    }
+}
