@@ -45,33 +45,33 @@ caches any reflections it generates to minimize the potential performance impact
 
 ## Requirements and Installation
 
-- auryn requires PHP 7.2 or higher.
+- auryn 2.x requires PHP 8.2 or higher.
+- auryn 1.x (the [`1.x` branch](https://github.com/overclokk/auryn/tree/1.x)) supports PHP 7.1 to 8.4 and receives fixes only.
+- Lazy loading proxies need `friendsofphp/proxy-manager-lts`, `ReflectionCacheApc` needs the `apcu` extension.
 
 #### Installation
 
-###### Github
-
-You can clone the latest auryn iteration at anytime from the github repository:
-
 ```bash
-$ git clone git://github.com/rdlowrey/auryn.git
+composer require overclokk/auryn
 ```
 
-###### Composer
+The package replaces `rdlowrey/auryn`, so libraries depending on it keep working.
 
-You may also use composer to include auryn as a dependency in your projects `composer.json`. The relevant package is `rdlowrey/auryn`.
+#### Upgrading from 1.x to 2.0
 
-Alternatively require the package using composer cli:
-
-```bash
-composer require rdlowrey/auryn
-```
-
-##### Manual Download
-
-Archived tagged release versions are also available for manual download on the project
-[tags page](https://github.com/rdlowrey/auryn/tags)
-
+* PHP 8.2 or higher is required.
+* The public API has native types. Invalid argument types raise a `TypeError`, for example
+  `share()` with something that is neither a class name nor an object no longer throws `ConfigException`.
+* Custom `Reflector`, `ReflectionCache` and `Executable` implementations or subclasses must update their
+  signatures.
+* Sharing a second, different instance of an already shared type throws `ConfigException` with code
+  `Injector::E_DOUBLE_SHARE`. Sharing the same instance again is still allowed.
+* A delegate must return an instance of the requested type, otherwise `make()` throws
+  `InjectionException` with code `Injector::E_MAKING_FAILED`.
+* `prepare()` throws `ConfigException` instead of `InjectionException` for an invalid callable.
+* Invalid `@param` class definitions throw `InjectionException` with code
+  `Injector::E_INVALID_DEFINE_ARGUMENT_NOT_ARRAY` or `Injector::E_INVALID_DEFINE_ARGUMENT_BAD_KEYS`.
+* `ReflectionCacheApc` uses the `apcu` extension instead of the removed `apc` one.
 
 ## Basic Usage
 
