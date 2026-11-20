@@ -100,8 +100,8 @@ class Injector
      *
      * Use this method to specify implementation classes for interface and abstract class typehints.
      *
-     * @param string $original The typehint to replace
-     * @param string $alias The implementation name
+     * @param mixed $original The typehint to replace, a non-empty string
+     * @param mixed $alias The implementation name, a non-empty string
      * @throws ConfigException if any argument is empty or not a string
      * @return self
      */
@@ -499,15 +499,15 @@ class Injector
             } elseif (isset($definition[$name]) || array_key_exists($name, $definition)) {
                 // interpret the param as a class name to be instantiated
                 $arg = $this->make($definition[$name]);
-            } elseif (($prefix = self::A_RAW . $name) && (isset($definition[$prefix]) || array_key_exists($prefix, $definition))) {
+            } elseif (array_key_exists(self::A_RAW . $name, $definition)) {
                 // interpret the param as a raw value to be injected
-                $arg = $definition[$prefix];
-            } elseif (($prefix = self::A_DELEGATE . $name) && isset($definition[$prefix])) {
+                $arg = $definition[self::A_RAW . $name];
+            } elseif (isset($definition[self::A_DELEGATE . $name])) {
                 // interpret the param as an invokable delegate
-                $arg = $this->buildArgFromDelegate($name, $definition[$prefix]);
-            } elseif (($prefix = self::A_DEFINE . $name) && isset($definition[$prefix])) {
+                $arg = $this->buildArgFromDelegate($name, $definition[self::A_DELEGATE . $name]);
+            } elseif (isset($definition[self::A_DEFINE . $name])) {
                 // interpret the param as a class definition
-                $arg = $this->buildArgFromParamDefineArr($definition[$prefix]);
+                $arg = $this->buildArgFromParamDefineArr($definition[self::A_DEFINE . $name]);
             } elseif (!$arg = $this->buildArgFromTypeHint($reflFunc, $reflParam)) {
                 $arg = $this->buildArgFromReflParam($reflParam, $className);
 
