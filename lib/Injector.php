@@ -40,6 +40,7 @@ class Injector
     public const M_CYCLIC_DEPENDENCY = "Detected a cyclic dependency while provisioning %s";
     public const E_MAKING_FAILED = 12;
     public const M_MAKING_FAILED = "Making %s did not result in an object, instead result is of type '%s'";
+    public const M_MAKING_FAILED_WRONG_TYPE = "Making %s did not result in an instance of it, instead result is of type '%s'";
     public const E_DOUBLE_SHARE = 13;
     public const M_DOUBLE_SHARE = "An instance of type %s has already been shared. Cannot share a second instance of the same type.";
 
@@ -372,6 +373,7 @@ class Injector
                 $reflectionFunction = $executable->getCallableReflection();
                 $args = $this->provisionFuncArgs($reflectionFunction, $args, null, $className);
                 $obj = call_user_func_array($executable->__invoke(...), $args);
+                $this->assertDelegateResultType($obj, $className);
             } elseif (isset($this->proxies[$normalizedClass])) {
                 if (isset($this->prepares[$normalizedClass])) {
                     $this->preparesProxy[$normalizedClass] = $this->prepares[$normalizedClass];
@@ -617,6 +619,23 @@ class Injector
         }
 
         return $arg;
+    }
+
+    /**
+     * A delegate must return an instance of the requested type, any other object is a configuration error.
+     * Non objects are reported by prepareInstance().
+     */
+    private function assertDelegateResultType(mixed $obj, string $className): void
+    {
+        if (!is_object($obj) || $obj instanceof $className) {
+            return;
+        }
+
+        throw new InjectionException(
+            $this->inProgressMakes,
+            sprintf(self::M_MAKING_FAILED_WRONG_TYPE, $className, $obj::class),
+            self::E_MAKING_FAILED
+        );
     }
 
     private function prepareInstance(mixed $obj, string $normalizedClass): mixed

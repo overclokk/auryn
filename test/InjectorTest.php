@@ -1325,4 +1325,26 @@ class InjectorTest extends TestCase
 
         $this->assertSame($instance, $injector->make(\stdClass::class));
     }
+
+    public function testDelegateResultMustBeAnInstanceOfTheRequestedType(): void
+    {
+        $injector = new Injector();
+        $injector->delegate(DepInterface::class, static fn () => new \stdClass());
+
+        $this->expectException(InjectionException::class);
+        $this->expectExceptionCode(Injector::E_MAKING_FAILED);
+        $this->expectExceptionMessage(
+            "Making Auryn\\DepInterface did not result in an instance of it, instead result is of type 'stdClass'"
+        );
+
+        $injector->make(DepInterface::class);
+    }
+
+    public function testDelegateResultImplementingTheRequestedInterfaceIsAccepted(): void
+    {
+        $injector = new Injector();
+        $injector->delegate(DepInterface::class, static fn () => new DepImplementation());
+
+        $this->assertInstanceOf(DepImplementation::class, $injector->make(DepInterface::class));
+    }
 }
