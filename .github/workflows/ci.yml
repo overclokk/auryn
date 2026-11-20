@@ -71,3 +71,29 @@ jobs:
         run: |
           curl -sSfL -o composer-require-checker.phar https://github.com/maglnet/ComposerRequireChecker/releases/latest/download/composer-require-checker.phar
           php composer-require-checker.phar check composer.json --config-file $PWD/composer-require-check.json
+
+  benchmark:
+    name: Benchmark on PHP ${{ matrix.php-version }}
+
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    strategy:
+      matrix:
+        php-version: [ '8.2', '8.5' ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+          ini-values: memory_limit=-1
+
+      - uses: ramsey/composer-install@v3
+
+      - name: Run benchmarks
+        run: vendor/bin/phpbench run --report=default

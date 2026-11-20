@@ -57,6 +57,10 @@ rector: ## Run Rector in dry-run mode
 rector/fix: ## Apply Rector changes
 	$(DOCKER_COMPOSE) run --rm php$(PHP) vendor/bin/rector process
 
+.PHONY: bench
+bench: ## Run the PHPBench benchmarks
+	$(DOCKER_COMPOSE) run --rm php$(PHP) composer bench
+
 .PHONY: stan
 stan: ## Run PHPStan
 	$(DOCKER_COMPOSE) run --rm php$(PHP) composer stan
