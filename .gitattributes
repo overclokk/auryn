@@ -1,2 +1,4 @@
 /examples          export-ignore
 /test              export-ignore
+/.docker export-ignore
+/Makefile export-ignore

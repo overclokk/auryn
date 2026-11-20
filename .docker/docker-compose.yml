@@ -1,0 +1,30 @@
+x-php-base: &php-base
+  build:
+    context: .
+    dockerfile: php/Dockerfile
+  container_name: ${PROJECT_NAME:-auryn}_php
+  volumes:
+    - ../:/app
+  environment:
+    UID: "${UID:-1000}"
+    GID: "${GID:-1000}"
+  working_dir: /app
+
+services:
+  # Lowest and highest PHP versions tested in CI.
+  php71:
+    <<: *php-base
+    build:
+      context: .
+      dockerfile: php/Dockerfile
+      args:
+        PHP_VERSION: 7.1
+    container_name: ${PROJECT_NAME:-auryn}_php71
+  php84:
+    <<: *php-base
+    build:
+      context: .
+      dockerfile: php/Dockerfile
+      args:
+        PHP_VERSION: 8.4
+    container_name: ${PROJECT_NAME:-auryn}_php84
