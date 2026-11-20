@@ -199,7 +199,7 @@ class TestMultiDepsWithCtor
 class NoTypehintNullDefaultConstructorClass
 {
     public $testParam = 1;
-    public function __construct(TestDependency $val1, $arg=42)
+    public function __construct(TestDependency $val1, $arg = 42)
     {
         $this->testParam = $arg;
     }
@@ -268,6 +268,8 @@ class ClassOuter
 
 class ProvTestNoDefinitionNullDefaultClass
 {
+    public $arg;
+
     public function __construct($arg = null)
     {
         $this->arg = $arg;
@@ -328,6 +330,9 @@ class InjectorTestParentClass
 
 class InjectorTestChildClass extends InjectorTestParentClass
 {
+    public $arg1;
+    public $arg2;
+
     public function __construct($arg1, $arg2)
     {
         parent::__construct($arg1);
@@ -404,7 +409,7 @@ class ExecuteClassDepsWithMethodDeps
     }
     public function execute(TestDependency $dep, $arg = null)
     {
-        return isset($arg) ? $arg : 42;
+        return $arg ?? 42;
     }
 }
 
@@ -579,6 +584,8 @@ class TestDependencyWithProtectedConstructor
 
 class TestNeedsDepWithProtCons
 {
+    public $dep;
+
     public function __construct(TestDependencyWithProtectedConstructor $dep)
     {
         $this->dep = $dep;
@@ -664,9 +671,7 @@ class ReturnsCallable
 
     public function getCallable()
     {
-        $callable = function () {
-            return $this->value;
-        };
+        $callable = (fn () => $this->value);
 
         return $callable;
     }
@@ -678,9 +683,7 @@ class DelegateClosureInGlobalScope
 
 function getDelegateClosureInGlobalScope()
 {
-    return function () {
-        return new DelegateClosureInGlobalScope();
-    };
+    return fn () => new DelegateClosureInGlobalScope();
 }
 
 class CloneTest
@@ -733,6 +736,8 @@ class DelegateA
 }
 class DelegatingInstanceA
 {
+    public $a;
+
     public function __construct(DelegateA $a)
     {
         $this->a = $a;
@@ -744,6 +749,8 @@ class DelegateB
 }
 class DelegatingInstanceB
 {
+    public $b;
+
     public function __construct(DelegateB $b)
     {
         $this->b = $b;
@@ -784,9 +791,7 @@ class ClosureFactoryWithPrivateState
 
     public function makeClosure()
     {
-        return function () {
-            return $this->secret;
-        };
+        return fn () => $this->secret;
     }
 }
 

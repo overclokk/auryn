@@ -34,7 +34,7 @@ class InjectionException extends InjectorException
             } elseif (is_object($callableOrMethodStr[0]) && is_string($callableOrMethodStr[1])) {
                 $callableString .= sprintf(
                     "[object(%s), '%s']",
-                    get_class($callableOrMethodStr[0]),
+                    $callableOrMethodStr[0]::class,
                     $callableOrMethodStr[1]
                 );
             }

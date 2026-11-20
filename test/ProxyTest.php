@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Auryn;
@@ -29,15 +30,13 @@ class ProxyTest extends TestCase
 
         $injector->proxy(
             TestDependency::class,
-            static function (string $className, callable $callback) {
-                return (new LazyLoadingValueHolderFactory)->createProxy(
-                    $className,
-                    static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
-                        $object = $callback();
-                        $initializer = null;
-                    }
-                );
-            }
+            static fn (string $className, callable $callback) => (new LazyLoadingValueHolderFactory())->createProxy(
+                $className,
+                static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
+                    $object = $callback();
+                    $initializer = null;
+                }
+            )
         );
 
         $class = $injector->make(TestDependency::class);
@@ -52,15 +51,13 @@ class ProxyTest extends TestCase
         $injector = new Injector();
         $injector->proxy(
             TestDependency::class,
-            static function (string $className, callable $callback) {
-                return (new LazyLoadingValueHolderFactory)->createProxy(
-                    $className,
-                    static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
-                        $object = $callback();
-                        $initializer = null;
-                    }
-                );
-            }
+            static fn (string $className, callable $callback) => (new LazyLoadingValueHolderFactory())->createProxy(
+                $className,
+                static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
+                    $object = $callback();
+                    $initializer = null;
+                }
+            )
         );
         $need_dep = $injector->make(TestNeedsDep::class);
 
@@ -72,15 +69,13 @@ class ProxyTest extends TestCase
         $injector = new Injector();
         $injector->proxy(
             TestDependency::class,
-            static function (string $className, callable $callback) {
-                return (new LazyLoadingValueHolderFactory)->createProxy(
-                    $className,
-                    static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
-                        $object = $callback();
-                        $initializer = null;
-                    }
-                );
-            }
+            static fn (string $className, callable $callback) => (new LazyLoadingValueHolderFactory())->createProxy(
+                $className,
+                static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
+                    $object = $callback();
+                    $initializer = null;
+                }
+            )
         );
         $injector->share(TestDependency::class);
         $class = $injector->make(TestDependency::class);
@@ -95,15 +90,13 @@ class ProxyTest extends TestCase
         $injector->alias(DepInterface::class, DepImplementation::class);
         $injector->proxy(
             DepInterface::class,
-            static function (string $className, callable $callback) {
-                return (new LazyLoadingValueHolderFactory)->createProxy(
-                    $className,
-                    static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
-                        $object = $callback();
-                        $initializer = null;
-                    }
-                );
-            }
+            static fn (string $className, callable $callback) => (new LazyLoadingValueHolderFactory())->createProxy(
+                $className,
+                static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
+                    $object = $callback();
+                    $initializer = null;
+                }
+            )
         );
         $object = $injector->make(DepInterface::class);
 
@@ -117,15 +110,13 @@ class ProxyTest extends TestCase
         $injector = new Injector();
         $injector->proxy(
             NoTypehintNoDefaultConstructorClass::class,
-            static function (string $className, callable $callback) {
-                return (new LazyLoadingValueHolderFactory)->createProxy(
-                    $className,
-                    static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
-                        $object = $callback();
-                        $initializer = null;
-                    }
-                );
-            }
+            static fn (string $className, callable $callback) => (new LazyLoadingValueHolderFactory())->createProxy(
+                $className,
+                static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
+                    $object = $callback();
+                    $initializer = null;
+                }
+            )
         );
         $injector->define(
             NoTypehintNoDefaultConstructorClass::class,
@@ -144,15 +135,13 @@ class ProxyTest extends TestCase
         $injector = new Injector();
         $injector->proxy(
             NoTypehintNoDefaultConstructorClass::class,
-            static function (string $className, callable $callback) {
-                return (new LazyLoadingValueHolderFactory)->createProxy(
-                    $className,
-                    static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
-                        $object = $callback();
-                        $initializer = null;
-                    }
-                );
-            }
+            static fn (string $className, callable $callback) => (new LazyLoadingValueHolderFactory())->createProxy(
+                $className,
+                static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
+                    $object = $callback();
+                    $initializer = null;
+                }
+            )
         );
 
         $obj = $injector->make(NoTypehintNoDefaultConstructorClass::class, [
@@ -167,15 +156,13 @@ class ProxyTest extends TestCase
         $injector = new Injector();
         $injector->proxy(
             NoTypehintNoDefaultConstructorClass::class,
-            static function (string $className, callable $callback) {
-                return (new LazyLoadingValueHolderFactory)->createProxy(
-                    $className,
-                    static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
-                        $object = $callback();
-                        $initializer = null;
-                    }
-                );
-            }
+            static fn (string $className, callable $callback) => (new LazyLoadingValueHolderFactory())->createProxy(
+                $className,
+                static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
+                    $object = $callback();
+                    $initializer = null;
+                }
+            )
         );
 
         $injector->defineParam('arg', 42);
@@ -190,15 +177,13 @@ class ProxyTest extends TestCase
         $injector = new Injector();
         $injector->proxy(
             PreparesImplementationTest::class,
-            static function (string $className, callable $callback) {
-                return (new LazyLoadingValueHolderFactory)->createProxy(
-                    $className,
-                    static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
-                        $object = $callback();
-                        $initializer = null;
-                    }
-                );
-            }
+            static fn (string $className, callable $callback) => (new LazyLoadingValueHolderFactory())->createProxy(
+                $className,
+                static function (&$object, $proxy, $method, $parameters, &$initializer) use ($callback) {
+                    $object = $callback();
+                    $initializer = null;
+                }
+            )
         );
 
         $injector->prepare(
@@ -220,9 +205,7 @@ class ProxyTest extends TestCase
         });
         $injector->delegate(
             PreparesImplementationTest::class,
-            function () {
-                return new PreparesImplementationTest();
-            }
+            fn () => new PreparesImplementationTest()
         );
 
         $object = $injector->make(PreparesImplementationTest::class);

@@ -54,7 +54,7 @@ class StandardReflector implements Reflector
     {
         $className = is_string($classNameOrInstance)
             ? $classNameOrInstance
-            : get_class($classNameOrInstance);
+            : $classNameOrInstance::class;
 
         return new \ReflectionMethod($className, $methodName);
     }
