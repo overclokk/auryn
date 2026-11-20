@@ -1,13 +1,15 @@
-<phpunit backupGlobals="false"
-         backupStaticAttributes="false"
-         colors="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
-         processIsolation="false"
-         stopOnFailure="false"
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
-        >
+         cacheDirectory=".phpunit.cache"
+         colors="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         failOnDeprecation="true"
+         failOnPhpunitDeprecation="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnPhpunitDeprecations="true">
     <php>
         <ini name="error_reporting" value="-1"/>
     </php>
@@ -16,30 +18,9 @@
             <directory>./test</directory>
         </testsuite>
     </testsuites>
-    <filter>
-        <whitelist addUncoveredFilesFromWhitelist="true">
+    <source>
+        <include>
             <directory>./lib</directory>
-        </whitelist>
-    </filter>
-    
-    <logging>
-        <log
-            type="coverage-text"
-            target="php://stdout"
-            lowUpperBound="35"
-            highLowerBound="75"
-        />
-        <!-- uncomment below to generate HTML code coverage reports in ./test/coverage -->
-        <!--
-        <log
-            type="coverage-html"
-            target="./test/coverage"
-            charset="UTF-8"
-            yui="true"
-            lowUpperBound="35"
-            highLowerBound="70"
-            showUncoveredFiles="true"
-        />
-        -->
-    </logging>
+        </include>
+    </source>
 </phpunit>

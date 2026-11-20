@@ -3,3 +3,6 @@ composer.lock
 .idea
 .phpunit.result.cache
 .php_cs.cache
+.phpunit.cache
+.phpstan.cache
+.php-cs-fixer.cache

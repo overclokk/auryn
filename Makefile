@@ -1,6 +1,6 @@
 DOCKER_COMPOSE ?= docker compose -f .docker/docker-compose.yml
 # Lowest supported PHP version, used by the targets without a version suffix.
-PHP ?= 71
+PHP ?= 82
 
 default: help
 
@@ -21,25 +21,25 @@ down: ## Remove the containers and volumes
 bash: bash$(PHP) ## Open a shell in the lowest PHP container
 
 .PHONY: bash%
-bash%: ## Open a shell in a PHP container (`make bash84`)
+bash%: ## Open a shell in a PHP container (`make bash85`)
 	$(DOCKER_COMPOSE) run --rm php$* bash
 
 .PHONY: install
 install: install$(PHP) ## Install the dependencies for the lowest PHP version
 
 .PHONY: install%
-install%: ## Install the dependencies for a PHP version (`make install84`), vendor/ is shared
+install%: ## Install the dependencies for a PHP version (`make install85`), vendor/ is shared
 	$(DOCKER_COMPOSE) run --rm php$* composer update --no-interaction --no-progress
 
 .PHONY: test
 test: test$(PHP) ## Run the tests on the lowest PHP version
 
 .PHONY: test%
-test%: install% ## Run the tests on a PHP version (`make test84`)
-	$(DOCKER_COMPOSE) run --rm php$* vendor/bin/phpunit --no-coverage
+test%: install% ## Run the tests on a PHP version (`make test85`)
+	$(DOCKER_COMPOSE) run --rm php$* vendor/bin/phpunit
 
 .PHONY: test/all
-test/all: test71 test84 ## Run the tests on the lowest and the highest PHP version
+test/all: test82 test85 ## Run the tests on the lowest and the highest PHP version
 
 .PHONY: cs
 cs: ## Check the coding style
@@ -50,9 +50,13 @@ cs/fix: ## Fix the coding style
 	$(DOCKER_COMPOSE) run --rm php$(PHP) composer cs:fix
 
 .PHONY: rector
-rector: ## Run Rector in dry-run mode (needs PHP 7.4+, uses php84)
-	$(DOCKER_COMPOSE) run --rm php84 vendor/bin/rector process --dry-run
+rector: ## Run Rector in dry-run mode
+	$(DOCKER_COMPOSE) run --rm php$(PHP) vendor/bin/rector process --dry-run
 
 .PHONY: rector/fix
-rector/fix: ## Apply Rector changes (uses php84)
-	$(DOCKER_COMPOSE) run --rm php84 vendor/bin/rector process
+rector/fix: ## Apply Rector changes
+	$(DOCKER_COMPOSE) run --rm php$(PHP) vendor/bin/rector process
+
+.PHONY: stan
+stan: ## Run PHPStan
+	$(DOCKER_COMPOSE) run --rm php$(PHP) composer stan

@@ -12,19 +12,19 @@ x-php-base: &php-base
 
 services:
   # Lowest and highest PHP versions tested in CI.
-  php71:
+  php82:
     <<: *php-base
     build:
       context: .
       dockerfile: php/Dockerfile
       args:
-        PHP_VERSION: 7.1
-    container_name: ${PROJECT_NAME:-auryn}_php71
-  php84:
+        PHP_VERSION: 8.2
+    container_name: ${PROJECT_NAME:-auryn}_php82
+  php85:
     <<: *php-base
     build:
       context: .
       dockerfile: php/Dockerfile
       args:
-        PHP_VERSION: 8.4
-    container_name: ${PROJECT_NAME:-auryn}_php84
+        PHP_VERSION: 8.5
+    container_name: ${PROJECT_NAME:-auryn}_php85
