@@ -215,19 +215,16 @@ class Injector
      *
      * @param string $name
      * @param mixed $callableOrMethodStr Any callable or provisionable invokable method
-     * @throws InjectionException if $callableOrMethodStr is not a callable.
-     *                            See https://github.com/rdlowrey/auryn#injecting-for-execution
+     * @throws ConfigException if $callableOrMethodStr is not a callable.
+     *                         See https://github.com/rdlowrey/auryn#injecting-for-execution
      */
     public function prepare(string $name, mixed $callableOrMethodStr): static
     {
         if ($this->isExecutable($callableOrMethodStr) === false) {
-            throw InjectionException::fromInvalidCallable(
-                $this->inProgressMakes,
-                $callableOrMethodStr
-            );
+            throw ConfigException::fromInvalidCallable($callableOrMethodStr);
         }
 
-        list(, $normalizedName) = $this->resolveAlias($name);
+        [, $normalizedName] = $this->resolveAlias($name);
         $this->prepares[$normalizedName] = $callableOrMethodStr;
 
         return $this;

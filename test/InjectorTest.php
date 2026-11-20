@@ -1145,8 +1145,9 @@ class InjectorTest extends TestCase
 
     public function testPrepareInvalidCallable(): void
     {
-        $this->expectException(InjectionException::class);
-        $this->expectExceptionMessage('This_does_not_exist');
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionCode(Injector::E_INVOKABLE);
+        $this->expectExceptionMessage("Invalid callable was 'This_does_not_exist'");
 
         $injector = new Injector();
         $invalidCallable = 'This_does_not_exist';
