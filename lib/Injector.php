@@ -40,6 +40,8 @@ class Injector
     public const M_CYCLIC_DEPENDENCY = "Detected a cyclic dependency while provisioning %s";
     public const E_MAKING_FAILED = 12;
     public const M_MAKING_FAILED = "Making %s did not result in an object, instead result is of type '%s'";
+    public const E_DOUBLE_SHARE = 13;
+    public const M_DOUBLE_SHARE = "An instance of type %s has already been shared. Cannot share a second instance of the same type.";
 
     private Reflector $reflector;
     private array $classDefinitions = [];
@@ -193,6 +195,14 @@ class Injector
                 self::E_ALIASED_CANNOT_SHARE
             );
         }
+        $shared = $this->shares[$normalizedName] ?? null;
+        if ($shared !== null && $shared !== $obj) {
+            throw new ConfigException(
+                sprintf(self::M_DOUBLE_SHARE, $obj::class),
+                self::E_DOUBLE_SHARE
+            );
+        }
+
         $this->shares[$normalizedName] = $obj;
     }
 

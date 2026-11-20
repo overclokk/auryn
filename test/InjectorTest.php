@@ -1291,4 +1291,38 @@ class InjectorTest extends TestCase
 
         $this->assertInstanceOf(OptionalSharedDependency::class, $consumer->dependency);
     }
+
+    public function testSharingASecondInstanceOfTheSameTypeThrows(): void
+    {
+        $injector = new Injector();
+        $injector->share(new \stdClass());
+
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionCode(Injector::E_DOUBLE_SHARE);
+        $this->expectExceptionMessage('stdClass');
+
+        $injector->share(new \stdClass());
+    }
+
+    public function testSharingTheSameInstanceTwiceIsAllowed(): void
+    {
+        $injector = new Injector();
+        $instance = new \stdClass();
+
+        $injector->share($instance);
+        $injector->share($instance);
+
+        $this->assertSame($instance, $injector->make(\stdClass::class));
+    }
+
+    public function testSharingAnInstanceAfterTheClassNameIsAllowed(): void
+    {
+        $injector = new Injector();
+        $instance = new \stdClass();
+
+        $injector->share(\stdClass::class);
+        $injector->share($instance);
+
+        $this->assertSame($instance, $injector->make(\stdClass::class));
+    }
 }
