@@ -1348,4 +1348,28 @@ class InjectorTest extends TestCase
 
         $this->assertInstanceOf(DepImplementation::class, $injector->make(DepInterface::class));
     }
+
+    public function testParamClassDefinitionMustBeAnArray(): void
+    {
+        $injector = new Injector();
+        $injector->define(NullableInterfaceThenScalar::class, ['@dependency' => 'not-an-array']);
+
+        $this->expectException(InjectionException::class);
+        $this->expectExceptionCode(Injector::E_INVALID_DEFINE_ARGUMENT_NOT_ARRAY);
+        $this->expectExceptionMessage("Value passed was of type 'string'");
+
+        $injector->make(NullableInterfaceThenScalar::class);
+    }
+
+    public function testParamClassDefinitionNeedsClassAndArguments(): void
+    {
+        $injector = new Injector();
+        $injector->define(NullableInterfaceThenScalar::class, ['@dependency' => [DepImplementation::class]]);
+
+        $this->expectException(InjectionException::class);
+        $this->expectExceptionCode(Injector::E_INVALID_DEFINE_ARGUMENT_BAD_KEYS);
+        $this->expectExceptionMessage('array key 1 not set');
+
+        $injector->make(NullableInterfaceThenScalar::class);
+    }
 }

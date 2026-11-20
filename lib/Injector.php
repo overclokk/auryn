@@ -43,6 +43,10 @@ class Injector
     public const M_MAKING_FAILED_WRONG_TYPE = "Making %s did not result in an instance of it, instead result is of type '%s'";
     public const E_DOUBLE_SHARE = 13;
     public const M_DOUBLE_SHARE = "An instance of type %s has already been shared. Cannot share a second instance of the same type.";
+    public const E_INVALID_DEFINE_ARGUMENT_NOT_ARRAY = 14;
+    public const M_INVALID_DEFINE_ARGUMENT_NOT_ARRAY = "Define parameters needs to be an array with contents of {0:class-string, 1:array of injector params}. Value passed was of type '%s'.";
+    public const E_INVALID_DEFINE_ARGUMENT_BAD_KEYS = 15;
+    public const M_INVALID_DEFINE_ARGUMENT_BAD_KEYS = "Define parameters needs to be an array with contents of {0:class-string, 1:array of injector params}. %s.";
 
     private Reflector $reflector;
     private array $classDefinitions = [];
@@ -526,15 +530,21 @@ class Injector
     {
         if (!is_array($definition)) {
             throw new InjectionException(
-                $this->inProgressMakes
-                // @TODO Add message
+                $this->inProgressMakes,
+                sprintf(self::M_INVALID_DEFINE_ARGUMENT_NOT_ARRAY, get_debug_type($definition)),
+                self::E_INVALID_DEFINE_ARGUMENT_NOT_ARRAY
             );
         }
 
-        if (!isset($definition[0], $definition[1])) {
+        $missingKeys = array_diff([0, 1], array_keys(array_filter($definition, static fn ($value) => $value !== null)));
+        if ($missingKeys !== []) {
             throw new InjectionException(
-                $this->inProgressMakes
-                // @TODO Add message
+                $this->inProgressMakes,
+                sprintf(
+                    self::M_INVALID_DEFINE_ARGUMENT_BAD_KEYS,
+                    implode(' ', array_map(static fn (int $key) => "array key $key not set", $missingKeys))
+                ),
+                self::E_INVALID_DEFINE_ARGUMENT_BAD_KEYS
             );
         }
 
