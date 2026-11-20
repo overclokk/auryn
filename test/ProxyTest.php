@@ -23,6 +23,15 @@ class ProxyTest extends TestCase
     }
 
     // Integration Tests
+    public function testProxyRejectsAnInvalidCallable(): void
+    {
+        $injector = new Injector();
+
+        $this->expectException(ConfigException::class);
+
+        $injector->proxy('1', 'string');
+    }
+
 
     public function testInstanceReturnedFromProxy()
     {
