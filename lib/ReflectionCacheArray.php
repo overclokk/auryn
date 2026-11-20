@@ -6,7 +6,7 @@ class ReflectionCacheArray implements ReflectionCache
 {
     private $cache = [];
 
-    public function fetch($key)
+    public function fetch(string $key): mixed
     {
         // The additional isset() check here improves performance but we also
         // need array_key_exists() because some cached values === NULL.
@@ -15,7 +15,7 @@ class ReflectionCacheArray implements ReflectionCache
             : false;
     }
 
-    public function store($key, $data)
+    public function store(string $key, mixed $data): void
     {
         $this->cache[$key] = $data;
     }

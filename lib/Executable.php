@@ -8,7 +8,7 @@ class Executable
     private $invocationObject;
     private $isInstanceMethod;
 
-    public function __construct(\ReflectionFunctionAbstract $reflFunc, $invocationObject = null)
+    public function __construct(\ReflectionFunctionAbstract $reflFunc, ?object $invocationObject = null)
     {
         if ($reflFunc instanceof \ReflectionMethod) {
             $this->isInstanceMethod = true;
@@ -19,7 +19,7 @@ class Executable
         }
     }
 
-    private function setMethodCallable(\ReflectionMethod $reflection, $invocationObject)
+    private function setMethodCallable(\ReflectionMethod $reflection, ?object $invocationObject): void
     {
         if (is_object($invocationObject)) {
             $this->callableReflection = $reflection;
@@ -33,9 +33,8 @@ class Executable
         }
     }
 
-    public function __invoke()
+    public function __invoke(mixed ...$args): mixed
     {
-        $args = func_get_args();
         $reflection = $this->callableReflection;
 
         if ($this->isInstanceMethod) {
@@ -50,7 +49,7 @@ class Executable
     /**
      * Rebind the closure, ReflectionFunction::invokeArgs() loses $this on old PHP versions.
      */
-    private function invokeClosure($reflection, $args)
+    private function invokeClosure(\ReflectionFunction $reflection, array $args): mixed
     {
         $scope = $reflection->getClosureScopeClass();
         $closure = \Closure::bind(
@@ -62,17 +61,17 @@ class Executable
         return call_user_func_array($closure, $args);
     }
 
-    public function getCallableReflection()
+    public function getCallableReflection(): \ReflectionFunctionAbstract
     {
         return $this->callableReflection;
     }
 
-    public function getInvocationObject()
+    public function getInvocationObject(): ?object
     {
         return $this->invocationObject;
     }
 
-    public function isInstanceMethod()
+    public function isInstanceMethod(): bool
     {
         return $this->isInstanceMethod;
     }

@@ -351,13 +351,32 @@ class InjectorTest extends TestCase
         $this->assertInstanceOf(Injector::class, $injector->share('SomeClass'));
     }
 
-    public function testShareThrowsExceptionOnInvalidArgument(): void
+    public function testShareRejectsInvalidArgumentType(): void
     {
-        $this->expectException(ConfigException::class);
-        $this->expectExceptionMessage('Auryn\Injector::share() requires a string class name or object instance at Argument 1; integer specified');
+        $this->expectException(\TypeError::class);
 
         $injector = new Injector();
-        $injector->share(42);
+        $injector->share([]);
+    }
+
+    /**
+     * @return iterable<string, array{0: callable(Injector): mixed}>
+     */
+    public static function provideInvalidArgumentTypes(): iterable
+    {
+        yield 'alias' => [static fn (Injector $injector) => $injector->alias([], DepImplementation::class)];
+        yield 'define' => [static fn (Injector $injector) => $injector->define([], [])];
+        yield 'defineParam' => [static fn (Injector $injector) => $injector->defineParam([], 'value')];
+        yield 'make' => [static fn (Injector $injector) => $injector->make([])];
+        yield 'inspect' => [static fn (Injector $injector) => $injector->inspect([])];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideInvalidArgumentTypes')]
+    public function testPublicApiRejectsInvalidArgumentTypes(callable $call): void
+    {
+        $this->expectException(\TypeError::class);
+
+        $call(new Injector());
     }
 
     public function testAliasAssignsValueAndReturnsCurrentInstance(): void

@@ -10,7 +10,7 @@ interface Reflector
      * @param string $class
      * @return \ReflectionClass
      */
-    public function getClass($class);
+    public function getClass(string $class): \ReflectionClass;
 
     /**
      * Retrieves and caches the constructor (ReflectionMethod) for the specified class
@@ -18,7 +18,7 @@ interface Reflector
      * @param string $class
      * @return \ReflectionMethod|null
      */
-    public function getCtor($class);
+    public function getCtor(string $class): ?\ReflectionMethod;
 
     /**
      * Retrieves and caches an array of constructor parameters for the given class
@@ -26,7 +26,7 @@ interface Reflector
      * @param string $class
      * @return \ReflectionParameter[]
      */
-    public function getCtorParams($class);
+    public function getCtorParams(string $class): ?array;
 
     /**
      * Retrieves the class type-hint from a given ReflectionParameter
@@ -40,7 +40,7 @@ interface Reflector
      * @param \ReflectionFunctionAbstract $function
      * @param \ReflectionParameter $param
      */
-    public function getParamTypeHint(\ReflectionFunctionAbstract $function, \ReflectionParameter $param);
+    public function getParamTypeHint(\ReflectionFunctionAbstract $function, \ReflectionParameter $param): ?string;
 
     /**
      * Retrieves and caches a reflection for the specified function
@@ -48,14 +48,14 @@ interface Reflector
      * @param string $functionName
      * @return \ReflectionFunction
      */
-    public function getFunction($functionName);
+    public function getFunction(string|\Closure $functionName): \ReflectionFunction;
 
     /**
      * Retrieves and caches a reflection for the specified class method
      *
-     * @param mixed $classNameOrInstance
+     * @param string|object $classNameOrInstance
      * @param string $methodName
      * @return \ReflectionMethod
      */
-    public function getMethod($classNameOrInstance, $methodName);
+    public function getMethod(string|object $classNameOrInstance, string $methodName): \ReflectionMethod;
 }

@@ -4,26 +4,26 @@ namespace Auryn;
 
 class StandardReflector implements Reflector
 {
-    public function getClass($class)
+    public function getClass(string $class): \ReflectionClass
     {
         return new \ReflectionClass($class);
     }
 
-    public function getCtor($class)
+    public function getCtor(string $class): ?\ReflectionMethod
     {
         $reflectionClass = new \ReflectionClass($class);
 
         return $reflectionClass->getConstructor();
     }
 
-    public function getCtorParams($class)
+    public function getCtorParams(string $class): ?array
     {
         return ($reflectedCtor = $this->getCtor($class))
             ? $reflectedCtor->getParameters()
             : null;
     }
 
-    public function getParamTypeHint(\ReflectionFunctionAbstract $function, \ReflectionParameter $param)
+    public function getParamTypeHint(\ReflectionFunctionAbstract $function, \ReflectionParameter $param): ?string
     {
         $type = $param->getType();
         if ($type instanceof \ReflectionNamedType) {
@@ -34,12 +34,12 @@ class StandardReflector implements Reflector
         return $type ? (string) $type : null;
     }
 
-    public function getFunction($functionName)
+    public function getFunction(string|\Closure $functionName): \ReflectionFunction
     {
         return new \ReflectionFunction($functionName);
     }
 
-    public function getMethod($classNameOrInstance, $methodName)
+    public function getMethod(string|object $classNameOrInstance, string $methodName): \ReflectionMethod
     {
         $className = is_string($classNameOrInstance)
             ? $classNameOrInstance

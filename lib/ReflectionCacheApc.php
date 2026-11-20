@@ -4,23 +4,22 @@ namespace Auryn;
 
 class ReflectionCacheApc implements ReflectionCache
 {
-    private $localCache;
-    private $timeToLive = 5;
+    private ReflectionCache $localCache;
+    private int $timeToLive = 5;
 
     public function __construct(?ReflectionCache $localCache = null)
     {
         $this->localCache = $localCache ?: new ReflectionCacheArray();
     }
 
-    public function setTimeToLive($seconds)
+    public function setTimeToLive(int $seconds): static
     {
-        $seconds = (int) $seconds;
         $this->timeToLive = ($seconds > 0) ? $seconds : $this->timeToLive;
 
         return $this;
     }
 
-    public function fetch($key)
+    public function fetch(string $key): mixed
     {
         $localData = $this->localCache->fetch($key);
 
@@ -33,7 +32,7 @@ class ReflectionCacheApc implements ReflectionCache
         return $success ? $data : false;
     }
 
-    public function store($key, $data)
+    public function store(string $key, mixed $data): void
     {
         $this->localCache->store($key, $data);
         apc_store($key, $data, $this->timeToLive);

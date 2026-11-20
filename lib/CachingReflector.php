@@ -19,7 +19,7 @@ class CachingReflector implements Reflector
         $this->cache = $cache ?: new ReflectionCacheArray();
     }
 
-    public function getClass($class)
+    public function getClass(string $class): \ReflectionClass
     {
         $cacheKey = self::CACHE_KEY_CLASSES . strtolower($class);
 
@@ -30,7 +30,7 @@ class CachingReflector implements Reflector
         return $reflectionClass;
     }
 
-    public function getCtor($class)
+    public function getCtor(string $class): ?\ReflectionMethod
     {
         $cacheKey = self::CACHE_KEY_CTORS . strtolower($class);
 
@@ -41,7 +41,7 @@ class CachingReflector implements Reflector
         return $reflectedCtor;
     }
 
-    public function getCtorParams($class)
+    public function getCtorParams(string $class): ?array
     {
         $cacheKey = self::CACHE_KEY_CTOR_PARAMS . strtolower($class);
 
@@ -52,7 +52,7 @@ class CachingReflector implements Reflector
         return $reflectedCtorParams;
     }
 
-    public function getParamTypeHint(\ReflectionFunctionAbstract $function, \ReflectionParameter $param)
+    public function getParamTypeHint(\ReflectionFunctionAbstract $function, \ReflectionParameter $param): ?string
     {
         $lowParam = strtolower($param->name);
 
@@ -79,7 +79,7 @@ class CachingReflector implements Reflector
         return $typeHint;
     }
 
-    public function getFunction($functionName)
+    public function getFunction(string|\Closure $functionName): \ReflectionFunction
     {
         $lowFunc = strtolower($functionName);
         $cacheKey = self::CACHE_KEY_FUNCS . $lowFunc;
@@ -91,7 +91,7 @@ class CachingReflector implements Reflector
         return $reflectedFunc;
     }
 
-    public function getMethod($classNameOrInstance, $methodName)
+    public function getMethod(string|object $classNameOrInstance, string $methodName): \ReflectionMethod
     {
         $className = is_string($classNameOrInstance)
             ? $classNameOrInstance

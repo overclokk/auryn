@@ -4,6 +4,6 @@ namespace Auryn;
 
 interface ReflectionCache
 {
-    public function fetch($key);
-    public function store($key, $data);
+    public function fetch(string $key): mixed;
+    public function store(string $key, mixed $data): void;
 }
