@@ -28,7 +28,7 @@ class InjectionException extends InjectorException
             $callableString .= $callableOrMethodStr;
         } elseif (is_array($callableOrMethodStr) &&
             array_key_exists(0, $callableOrMethodStr) &&
-            array_key_exists(0, $callableOrMethodStr)) {
+            array_key_exists(1, $callableOrMethodStr)) {
             if (is_string($callableOrMethodStr[0]) && is_string($callableOrMethodStr[1])) {
                 $callableString .= $callableOrMethodStr[0].'::'.$callableOrMethodStr[1];
             } elseif (is_object($callableOrMethodStr[0]) && is_string($callableOrMethodStr[1])) {
