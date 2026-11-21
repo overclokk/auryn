@@ -488,6 +488,11 @@ class Injector
         foreach ($reflParams as $i => $reflParam) {
             $name = $reflParam->name;
 
+            if ($reflParam->isVariadic() && $this->hasVariadicDefinition($definition, $name)) {
+                // a variadic parameter is always the last one, its definition is the list of arguments
+                return [...$args, ...$this->buildVariadicArgs($definition, $name)];
+            }
+
             if (isset($definition[$i]) || array_key_exists($i, $definition)) {
                 // indexed arguments take precedence over named parameters
                 $arg = $definition[$i];
@@ -518,6 +523,40 @@ class Injector
         }
 
         return $args;
+    }
+
+    private function hasVariadicDefinition(array $definition, string $name): bool
+    {
+        return array_key_exists($name, $definition)
+            || array_key_exists(self::A_RAW . $name, $definition)
+            || isset($definition[self::A_DELEGATE . $name]);
+    }
+
+    /**
+     * Class names are made by the injector, raw values and delegate results are used as they are.
+     * A single value is a list of one, the keys are ignored.
+     */
+    private function buildVariadicArgs(array $definition, string $name): array
+    {
+        if (array_key_exists($name, $definition)) {
+            return array_map(
+                $this->make(...),
+                array_values((array) $definition[$name])
+            );
+        }
+
+        if (array_key_exists(self::A_RAW . $name, $definition)) {
+            return $this->toArgumentList($definition[self::A_RAW . $name]);
+        }
+
+        return $this->toArgumentList(
+            $this->buildArgFromDelegate($name, $definition[self::A_DELEGATE . $name])
+        );
+    }
+
+    private function toArgumentList(mixed $value): array
+    {
+        return is_array($value) ? array_values($value) : [$value];
     }
 
     private function isOmittableParameter(\ReflectionParameter $reflParam): bool

@@ -959,9 +959,30 @@ Keep calling it only from the plugin entry points, passing the injector around w
 
 ### Variadic dependencies
 
-Auryn does not build a list for variadic parameters such as `Repository ...$repositories`. Use a delegate or an
-object that collects the dependencies, both described in
-[Excluded features](excluded_features.md#variadic-dependencies).
+A variadic parameter, always the last one, receives the list of arguments of its definition, in `define()` or in the
+`$args` of `make()` and `execute()`:
+
+```php
+class Foo
+{
+    public function __construct(Repository ...$repositories)
+    {
+    }
+}
+
+// Class names, each one is made by the injector, so shares and aliases apply.
+$injector->define(Foo::class, ['repositories' => [MysqlRepository::class, CacheRepository::class]]);
+
+// Raw values.
+$injector->define(Bar::class, [':names' => ['first', 'second']]);
+
+// A delegate returning the list.
+$injector->define(Foo::class, ['+repositories' => static fn() => $locator->repositoriesFor(Foo::class)]);
+```
+
+The keys of the list are ignored and a single value is a list of one. A raw array for an `array ...$items` parameter
+is spread too, wrap it in another array to pass it as a single argument. Without a definition the type is resolved
+as for any other parameter, so a variadic interface needs an alias.
 
 ### Context objects and multiple instances of the same type
 

@@ -8,7 +8,6 @@ feel right. Each section describes the feature, explains why it was not included
 Adapted from the [rdlowrey/auryn](https://github.com/rdlowrey/auryn) `dev` branch.
 
 * [Resolving dependencies based on the constructor chain](#resolving-dependencies-based-on-the-constructor-chain)
-* [Variadic dependencies](#variadic-dependencies)
 * [Parameter definitions not inherited from parent classes](#parameter-definitions-not-inherited-from-parent-classes)
 * [Resolve interfaces and abstracts to shared instances](#resolve-interfaces-and-abstracts-to-shared-instances)
 * [Optional, aka null default, parameters](#optional-aka-null-default-parameters)
@@ -77,102 +76,6 @@ to understand what is happening in your application.
 
 It is too much complexity for an injector. The complexity has to live somewhere, but it belongs to the logger and its
 infrastructure, not to the injector.
-
-## Variadic dependencies
-
-Original discussion: https://github.com/rdlowrey/auryn/issues/134
-
-### Description
-
-Sometimes, particularly with legacy code, a class depends on many instances of the same type:
-
-```php
-interface Repository
-{
-    public function findInfo(): ?Info;
-}
-
-class Foo
-{
-    public function __construct(Repository ...$repositories)
-    {
-        // ...
-    }
-}
-```
-
-Auryn does not build a list for variadic parameters: an interface type fails with an `InjectionException`, a concrete
-type receives a single instance.
-
-### Alternative solutions
-
-#### Use a delegate
-
-The simplest work around is a delegate that creates the object with variadic dependencies:
-
-```php
-function createFoo(RepositoryLocator $repoLocator): Foo
-{
-    // Or whatever code is needed to find the repositories.
-    $repositories = $repoLocator->getRepos('Foo');
-
-    return new Foo(...$repositories);
-}
-
-$injector->delegate(Foo::class, 'createFoo');
-```
-
-The downside is that some application logic moves into the injector configuration.
-
-#### Use an object that collects the variadic dependencies
-
-With many classes that have variadic dependencies, a delegate for each of them is tedious. A single class that
-collects the dependencies can be autowired into all of them, and gives you a place in your own code to handle errors:
-
-```php
-class RepositoryCollection
-{
-    /** @var list<Repository> */
-    private array $repositories;
-
-    public function __construct(Repository ...$repositories)
-    {
-        $this->repositories = $repositories;
-    }
-
-    public function findInfo(): ?Info
-    {
-        foreach ($this->repositories as $repository) {
-            $info = $repository->findInfo();
-            if ($info !== null) {
-                return $info;
-            }
-        }
-
-        return null;
-    }
-}
-
-class Foo
-{
-    public function __construct(RepositoryCollection $repositories)
-    {
-        // ...
-    }
-}
-
-function createRepositoryCollection(RepositoryLocator $repoLocator): RepositoryCollection
-{
-    return new RepositoryCollection(...$repoLocator->getRepos('Foo'));
-}
-
-$injector->delegate(RepositoryCollection::class, 'createRepositoryCollection');
-```
-
-### Why it was not included
-
-A variadic parameter is not a type, so a dependency injector cannot reason about it. Use a delegate or a collecting
-object to achieve the same result in a way that works with dependency injection.
 
 ## Parameter definitions not inherited from parent classes
 

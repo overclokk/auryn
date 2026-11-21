@@ -1372,4 +1372,85 @@ class InjectorTest extends TestCase
 
         $injector->make(NullableInterfaceThenScalar::class);
     }
+
+    public function testVariadicParameterReceivesAListOfDefinedClasses(): void
+    {
+        $injector = new Injector();
+        $injector->define(NeedsVariadicDependencies::class, [
+            'dependencies' => [FirstVariadicDependency::class, SecondVariadicDependency::class],
+        ]);
+
+        $object = $injector->make(NeedsVariadicDependencies::class);
+
+        $this->assertCount(2, $object->dependencies);
+        $this->assertInstanceOf(FirstVariadicDependency::class, $object->dependencies[0]);
+        $this->assertInstanceOf(SecondVariadicDependency::class, $object->dependencies[1]);
+    }
+
+    public function testVariadicClassListUsesSharedInstances(): void
+    {
+        $shared = new FirstVariadicDependency();
+        $injector = new Injector();
+        $injector->share($shared);
+        $injector->define(NeedsVariadicDependencies::class, ['dependencies' => [FirstVariadicDependency::class]]);
+
+        $this->assertSame([$shared], $injector->make(NeedsVariadicDependencies::class)->dependencies);
+    }
+
+    public function testVariadicParameterReceivesARawList(): void
+    {
+        $injector = new Injector();
+        $injector->define(NeedsVariadicNames::class, [':names' => ['first', 'second']]);
+
+        $this->assertSame(['first', 'second'], $injector->make(NeedsVariadicNames::class)->names);
+    }
+
+    public function testVariadicParameterReceivesTheListReturnedByADelegate(): void
+    {
+        $first = new FirstVariadicDependency();
+        $second = new SecondVariadicDependency();
+        $injector = new Injector();
+        $injector->define(NeedsVariadicDependencies::class, ['+dependencies' => static fn () => [$first, $second]]);
+
+        $this->assertSame([$first, $second], $injector->make(NeedsVariadicDependencies::class)->dependencies);
+    }
+
+    public function testVariadicListFollowsTheLeadingParameters(): void
+    {
+        $injector = new Injector();
+        $object = $injector->make(NeedsLeadingArgumentAndVariadicDependencies::class, [
+            ':prefix' => 'prefix',
+            'dependencies' => [FirstVariadicDependency::class, SecondVariadicDependency::class],
+        ]);
+
+        $this->assertSame('prefix', $object->prefix);
+        $this->assertCount(2, $object->dependencies);
+    }
+
+    public function testVariadicListKeysAreIgnored(): void
+    {
+        $injector = new Injector();
+        $injector->define(NeedsVariadicNames::class, [':names' => ['a' => 'first', 'b' => 'second']]);
+
+        $this->assertSame(['first', 'second'], $injector->make(NeedsVariadicNames::class)->names);
+    }
+
+    public function testEmptyVariadicListPassesNoArguments(): void
+    {
+        $injector = new Injector();
+        $injector->define(NeedsVariadicDependencies::class, ['dependencies' => []]);
+
+        $this->assertSame([], $injector->make(NeedsVariadicDependencies::class)->dependencies);
+    }
+
+    public function testVariadicParameterStillAcceptsASingleClass(): void
+    {
+        $injector = new Injector();
+        $injector->define(NeedsVariadicDependencies::class, ['dependencies' => FirstVariadicDependency::class]);
+
+        $dependencies = $injector->make(NeedsVariadicDependencies::class)->dependencies;
+
+        $this->assertCount(1, $dependencies);
+        $this->assertInstanceOf(FirstVariadicDependency::class, $dependencies[0]);
+    }
 }

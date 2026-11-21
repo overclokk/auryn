@@ -818,3 +818,45 @@ class ConsumerOfRequiredNullableDependency
         $this->dependency = $dependency;
     }
 }
+
+interface VariadicDependency
+{
+}
+
+class FirstVariadicDependency implements VariadicDependency
+{
+}
+
+class SecondVariadicDependency implements VariadicDependency
+{
+}
+
+class NeedsVariadicDependencies
+{
+    public array $dependencies;
+
+    public function __construct(VariadicDependency ...$dependencies)
+    {
+        $this->dependencies = $dependencies;
+    }
+}
+
+class NeedsLeadingArgumentAndVariadicDependencies
+{
+    public array $dependencies;
+
+    public function __construct(public string $prefix, VariadicDependency ...$dependencies)
+    {
+        $this->dependencies = $dependencies;
+    }
+}
+
+class NeedsVariadicNames
+{
+    public array $names;
+
+    public function __construct(string ...$names)
+    {
+        $this->names = $names;
+    }
+}
