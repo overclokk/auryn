@@ -1,5 +1,22 @@
 # auryn [![Build Status](https://github.com/overclokk/auryn/actions/workflows/ci.yml/badge.svg)](https://github.com/overclokk/auryn/actions)
 
+## Thank you
+
+This package is a fork of [rdlowrey/auryn](https://github.com/rdlowrey/auryn), and it would not exist without the
+work of the people who created and maintained it for more than ten years.
+
+A big thank you to [Daniel Lowrey](https://github.com/rdlowrey), who created auryn, to
+[Dan Ackroyd](https://github.com/Danack) and [Levi Morrison](https://github.com/morrisonlevi), who maintained and
+evolved it, and to every [contributor](https://github.com/rdlowrey/auryn/graphs/contributors), including
+[Niklas Keller](https://github.com/kelunik) and [Markus Staab](https://github.com/staabm), for their time, their
+care and their ideas.
+
+Their clear design, an injector driven by explicit configuration instead of hidden magic, is the reason this fork
+keeps going. The fixes, docs and features ported from the original repository keep their history, and every
+improvement here builds on their work.
+
+Even if this thank you is written by an AI it reflect what I really think and I couldn't have written it any better as I'm not a native English
+
 auryn is a recursive dependency injector. Use auryn to bootstrap and wire together
 S.O.L.I.D., object-oriented PHP applications.
 
