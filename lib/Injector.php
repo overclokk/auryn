@@ -46,6 +46,8 @@ class Injector
     public const E_INVALID_DEFINE_ARGUMENT_NOT_ARRAY = 14;
     public const M_INVALID_DEFINE_ARGUMENT_NOT_ARRAY = "Define parameters needs to be an array with contents of {0:class-string, 1:array of injector params}. Value passed was of type '%s'.";
     public const E_INVALID_DEFINE_ARGUMENT_BAD_KEYS = 15;
+    public const E_UNKNOWN_DEFINITION_KEY = 16;
+    public const M_UNKNOWN_DEFINITION_KEY = "No parameter of %s() matches the definition key '%s'";
     public const M_INVALID_DEFINE_ARGUMENT_BAD_KEYS = "Define parameters needs to be an array with contents of {0:class-string, 1:array of injector params}. %s.";
 
     private Reflector $reflector;
@@ -433,6 +435,7 @@ class Injector
             $ctor = $this->reflector->getCtor($className);
 
             if (!$ctor) {
+                $this->assertDefinitionKeysMatch($this->mergeClassDefinition($normalizedClass, $definition), [], $className . '::__construct');
                 $obj = $this->instantiateWithoutCtorParams($className);
             } elseif (!$ctor->isPublic()) {
                 throw new InjectionException(
@@ -442,12 +445,12 @@ class Injector
                 );
             } elseif ($ctorParams = $this->reflector->getCtorParams($className)) {
                 $reflClass = $this->reflector->getClass($className);
-                $definition = isset($this->classDefinitions[$normalizedClass])
-                    ? array_replace($this->classDefinitions[$normalizedClass], $definition)
-                    : $definition;
+                $definition = $this->mergeClassDefinition($normalizedClass, $definition);
+                $this->assertDefinitionKeysMatch($definition, $ctorParams, $className . '::__construct');
                 $args = $this->provisionFuncArgs($ctor, $definition, $ctorParams, $className);
                 $obj = $reflClass->newInstanceArgs($args);
             } else {
+                $this->assertDefinitionKeysMatch($this->mergeClassDefinition($normalizedClass, $definition), [], $className . '::__construct');
                 $obj = $this->instantiateWithoutCtorParams($className);
             }
 
@@ -460,6 +463,53 @@ class Injector
                 $e
             );
         }
+    }
+
+    private function mergeClassDefinition(string $normalizedClass, array $definition): array
+    {
+        return isset($this->classDefinitions[$normalizedClass])
+            ? array_replace($this->classDefinitions[$normalizedClass], $definition)
+            : $definition;
+    }
+
+    /**
+     * Every definition key must target a parameter, by position or by name with an optional prefix,
+     * so a typo is reported instead of silently ignored.
+     *
+     * @param list<\ReflectionParameter> $reflParams
+     */
+    private function assertDefinitionKeysMatch(array $definition, array $reflParams, string $functionName): void
+    {
+        foreach (array_keys($definition) as $key) {
+            if ($this->keyTargetsAParameter($key, $reflParams)) {
+                continue;
+            }
+
+            throw new InjectionException(
+                $this->inProgressMakes,
+                sprintf(self::M_UNKNOWN_DEFINITION_KEY, $functionName, $key),
+                self::E_UNKNOWN_DEFINITION_KEY
+            );
+        }
+    }
+
+    /**
+     * @param list<\ReflectionParameter> $reflParams
+     */
+    private function keyTargetsAParameter(int|string $key, array $reflParams): bool
+    {
+        if (is_int($key)) {
+            return $key < count($reflParams) || ($reflParams !== [] && end($reflParams)->isVariadic());
+        }
+
+        $name = in_array($key[0] ?? '', [self::A_RAW, self::A_DELEGATE, self::A_DEFINE], true) ? substr($key, 1) : $key;
+        foreach ($reflParams as $reflParam) {
+            if ($reflParam->name === $name) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function instantiateWithoutCtorParams(string $className): object
@@ -742,9 +792,17 @@ class Injector
     {
         [$reflFunc, $invocationObj] = $this->buildExecutableStruct($callableOrMethodStr);
         $executable = new Executable($reflFunc, $invocationObj);
+        $this->assertDefinitionKeysMatch($args, $reflFunc->getParameters(), $this->functionName($reflFunc));
         $args = $this->provisionFuncArgs($reflFunc, $args, null, $invocationObj === null ? null : $invocationObj::class);
 
         return call_user_func_array($executable->__invoke(...), $args);
+    }
+
+    private function functionName(\ReflectionFunctionAbstract $reflFunc): string
+    {
+        return $reflFunc instanceof \ReflectionMethod
+            ? $reflFunc->class . '::' . $reflFunc->name
+            : $reflFunc->name;
     }
 
     /**

@@ -698,6 +698,10 @@ For a parameter named `foo` at position `i`, the first matching rule wins:
 6. Otherwise the normal resolution applies: the type (aliases, shares, delegates), the global parameter definitions
    and finally the default value.
 
+Every key must target a parameter, a key that matches none, for example `':tilte'` instead of `':title'`, throws
+`InjectionException` with code `Injector::E_UNKNOWN_DEFINITION_KEY`. The same applies to `define()`. The `$args` of
+`make()` for a delegated class are passed to the delegate, not to the constructor, and are not checked.
+
 ```php
 $object = $injector->make(PrefixDefineTest::class, [
     Injector::A_DEFINE . 'pdd' => [

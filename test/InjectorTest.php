@@ -987,9 +987,10 @@ class InjectorTest extends TestCase
      */
     public function testCustomDefinitionNotPassedThrough(): void
     {
+        // ':foo' belongs to the dependency, not to the class being made, so it is rejected instead of passed through.
         $this->expectException(InjectionException::class);
-        $this->expectExceptionMessage('No definition available to provision typeless parameter $foo at position 0 in Auryn\DependencyWithDefinedParam::__construct() declared in Auryn\DependencyWithDefinedParam::');
-        $this->expectExceptionCode(Injector::E_UNDEFINED_PARAM);
+        $this->expectExceptionMessage("No parameter of Auryn\\RequiresDependencyWithDefinedParam::__construct() matches the definition key ':foo'");
+        $this->expectExceptionCode(Injector::E_UNKNOWN_DEFINITION_KEY);
 
         $injector = new Injector();
         $injector->share(DependencyWithDefinedParam::class);
@@ -1452,5 +1453,82 @@ class InjectorTest extends TestCase
 
         $this->assertCount(1, $dependencies);
         $this->assertInstanceOf(FirstVariadicDependency::class, $dependencies[0]);
+    }
+
+    /**
+     * @return iterable<string, array{0: array<array-key, mixed>, 1: string}>
+     */
+    public static function provideUnknownDefinitionKeys(): iterable
+    {
+        yield 'raw' => [[':title' => 'ok', ':tilte' => 'typo'], ':tilte'];
+        yield 'class name' => [[':title' => 'ok', 'dependecy' => DepImplementation::class], 'dependecy'];
+        yield 'delegate' => [[':title' => 'ok', '+dependecy' => static fn () => null], '+dependecy'];
+        yield 'class definition' => [[':title' => 'ok', '@dependecy' => [DepImplementation::class, []]], '@dependecy'];
+        yield 'position' => [[':title' => 'ok', 2 => 'extra'], '2'];
+    }
+
+    /**
+     * @param array<array-key, mixed> $definition
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('provideUnknownDefinitionKeys')]
+    public function testDefinitionKeysMustMatchAConstructorParameter(array $definition, string $key): void
+    {
+        $injector = new Injector();
+        $injector->define(NeedsTitleAndDependency::class, $definition);
+
+        $this->expectException(InjectionException::class);
+        $this->expectExceptionCode(Injector::E_UNKNOWN_DEFINITION_KEY);
+        $this->expectExceptionMessage(sprintf(
+            "No parameter of %s::__construct() matches the definition key '%s'",
+            NeedsTitleAndDependency::class,
+            $key
+        ));
+
+        $injector->make(NeedsTitleAndDependency::class);
+    }
+
+    public function testMakeArgsMustMatchAConstructorParameter(): void
+    {
+        $injector = new Injector();
+
+        $this->expectException(InjectionException::class);
+        $this->expectExceptionCode(Injector::E_UNKNOWN_DEFINITION_KEY);
+
+        $injector->make(NeedsTitleAndDependency::class, [':title' => 'ok', ':tilte' => 'typo']);
+    }
+
+    public function testDefinitionForAClassWithoutConstructorIsRejected(): void
+    {
+        $injector = new Injector();
+        $injector->define(WithoutConstructor::class, [':value' => 'unused']);
+
+        $this->expectException(InjectionException::class);
+        $this->expectExceptionCode(Injector::E_UNKNOWN_DEFINITION_KEY);
+
+        $injector->make(WithoutConstructor::class);
+    }
+
+    public function testExecuteArgsMustMatchACallableParameter(): void
+    {
+        $injector = new Injector();
+
+        $this->expectException(InjectionException::class);
+        $this->expectExceptionCode(Injector::E_UNKNOWN_DEFINITION_KEY);
+
+        $injector->execute(static fn (string $name) => $name, [':name' => 'ok', ':nmae' => 'typo']);
+    }
+
+    public function testMatchingDefinitionKeysAreAccepted(): void
+    {
+        $injector = new Injector();
+        $injector->define(NeedsTitleAndDependency::class, [
+            ':title' => 'title',
+            '+dependency' => static fn () => new DepImplementation(),
+        ]);
+
+        $object = $injector->make(NeedsTitleAndDependency::class);
+
+        $this->assertSame('title', $object->title);
+        $this->assertInstanceOf(DepImplementation::class, $object->dependency);
     }
 }

@@ -860,3 +860,14 @@ class NeedsVariadicNames
         $this->names = $names;
     }
 }
+
+class NeedsTitleAndDependency
+{
+    public function __construct(public string $title, public ?DepInterface $dependency = null)
+    {
+    }
+}
+
+class WithoutConstructor
+{
+}
