@@ -698,6 +698,19 @@ For a parameter named `foo` at position `i`, the first matching rule wins:
 6. Otherwise the normal resolution applies: the type (aliases, shares, delegates), the global parameter definitions
    and finally the default value.
 
+The `Auryn\Arguments` builder writes the keys with their prefixes, `define()`, `make()` and `execute()` accept it in
+place of the array:
+
+```php
+use Auryn\Arguments;
+
+$injector->define(Report::class, (new Arguments())
+    ->raw('title', 'Monthly report')                    // ':title'
+    ->make('logger', FileLogger::class)                 // 'logger', a list of classes for a variadic
+    ->delegate('clock', static fn() => new FixedClock()) // '+clock'
+    ->define('connection', Connection::class, (new Arguments())->raw('dsn', 'sqlite::memory:'))); // '@connection'
+```
+
 Every key must target a parameter, a key that matches none, for example `':tilte'` instead of `':title'`, throws
 `InjectionException` with code `Injector::E_UNKNOWN_DEFINITION_KEY`. The same applies to `define()`. The `$args` of
 `make()` for a delegated class are passed to the delegate, not to the constructor, and are not checked.

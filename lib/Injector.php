@@ -78,8 +78,9 @@ class Injector
      * @param array $args An array mapping parameter names to values/instructions
      *
      */
-    public function define(string $name, array $args): static
+    public function define(string $name, array|Arguments $args): static
     {
+        $args = $args instanceof Arguments ? $args->toArray() : $args;
         list(, $normalizedName) = $this->resolveAlias($name);
         $this->classDefinitions[$normalizedName] = $args;
 
@@ -344,8 +345,9 @@ class Injector
      * @throws InjectionException if a cyclic gets detected when provisioning
      * @return mixed
      */
-    public function make(string $name, array $args = []): mixed
+    public function make(string $name, array|Arguments $args = []): mixed
     {
+        $args = $args instanceof Arguments ? $args->toArray() : $args;
         [$className, $normalizedClass] = $this->resolveAlias($name);
 
         if (isset($this->inProgressMakes[$normalizedClass])) {
@@ -788,8 +790,9 @@ class Injector
      * @throws \Auryn\InjectionException
      * @return mixed Returns the invocation result returned from calling the generated executable
      */
-    public function execute(mixed $callableOrMethodStr, array $args = []): mixed
+    public function execute(mixed $callableOrMethodStr, array|Arguments $args = []): mixed
     {
+        $args = $args instanceof Arguments ? $args->toArray() : $args;
         [$reflFunc, $invocationObj] = $this->buildExecutableStruct($callableOrMethodStr);
         $executable = new Executable($reflFunc, $invocationObj);
         $this->assertDefinitionKeysMatch($args, $reflFunc->getParameters(), $this->functionName($reflFunc));
