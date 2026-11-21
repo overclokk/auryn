@@ -778,7 +778,7 @@ class NullableInterfaceThenScalar
     public $dependency;
     public $value;
 
-    public function __construct(DepInterface $dependency = null, $value = 5)
+    public function __construct(?DepInterface $dependency = null, $value = 5)
     {
         $this->dependency = $dependency;
         $this->value = $value;
@@ -803,7 +803,7 @@ class ConsumerOfOptionalSharedDependency
 {
     public $dependency;
 
-    public function __construct(OptionalSharedDependency $dependency = null)
+    public function __construct(?OptionalSharedDependency $dependency = null)
     {
         $this->dependency = $dependency;
     }
