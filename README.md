@@ -35,12 +35,21 @@ caches any reflections it generates to minimize the potential performance impact
 * [Instantiation Delegates](#instantiation-delegates)
 * [Prepares and Setter Injection](#prepares-and-setter-injection)
 * [Injecting for Execution](#injecting-for-execution)
+* [Custom make() and execute() arguments](#custom-make-and-execute-arguments)
 * [Dependency Resolution](#dependency-resolution)
 
 **Example Use Cases**
 
 * [Avoiding Evil Singletons](#avoiding-evil-singletons)
 * [Application Bootstrapping](#app-bootstrapping)
+* [When app-bootstrapping by auryn is not possible](#when-app-bootstrapping-by-auryn-is-not-possible)
+
+**Advanced Patterns**
+
+* [Variadic dependencies](#variadic-dependencies)
+* [Context objects and multiple instances of the same type](#context-objects-and-multiple-instances-of-the-same-type)
+
+**[Excluded features](excluded_features.md)**: what auryn does not do on purpose, and the alternatives.
 
 
 ## Requirements and Installation
@@ -672,6 +681,35 @@ var_dump($injector->execute('Example::myMethod', $args = [':arg2' => 42]));
 ```
 
 
+### Custom make() and execute() arguments
+
+The `$args` parameter of `Injector::make(string $name, array $args = [])` and
+`Injector::execute(mixed $callableOrMethodStr, array $args = [])` passes a bespoke set of arguments for that single
+creation or execution.
+
+For a parameter named `foo` at position `i`, the first matching rule wins:
+
+1. `$args[i]`, an integer key: the value is used as is.
+2. `$args['foo']`: the value is a class name, the injector makes it.
+3. `$args[':foo']` (`Injector::A_RAW . 'foo'`): the value is used as is.
+4. `$args['+foo']` (`Injector::A_DELEGATE . 'foo'`): the value is a delegate, its return value is used.
+5. `$args['@foo']` (`Injector::A_DEFINE . 'foo'`): the value is an array `[class-string, array $args]`, the injector
+   makes that class with those arguments.
+6. Otherwise the normal resolution applies: the type (aliases, shares, delegates), the global parameter definitions
+   and finally the default value.
+
+```php
+$object = $injector->make(PrefixDefineTest::class, [
+    Injector::A_DEFINE . 'pdd' => [
+        PrefixDefineDependency::class,
+        [Injector::A_RAW . 'message' => $message],
+    ],
+]);
+```
+
+Here the injector makes `PrefixDefineTest`, and creates its `$pdd` dependency, a `PrefixDefineDependency`, with
+`$message` as its `message` argument.
+
 ### Dependency Resolution
 
 `Auryn\Injector` resolves dependencies in the following order:
@@ -894,3 +932,98 @@ eliminate evil Singletons using the sharing capabilities of the auryn DIC. In th
 code, we share the request object so that any classes instantiated by the `Auryn\Injector` that ask
 for a `Request` will receive the same instance. This feature not only helps eliminate Singletons,
 but also the need for hard-to-test `static` properties.
+
+### When app-bootstrapping by auryn is not possible
+
+Sometimes the initialisation of the application is outside of your control, for example a WordPress plugin is
+initialised by WordPress, not the other way round. You can still use auryn through a function that creates a single,
+configured injector:
+
+```php
+function injector(): Auryn\Injector
+{
+    static $injector = null;
+
+    if ($injector === null) {
+        $injector = new Auryn\Injector();
+        // Configure defines, shares, aliases and delegates here.
+    }
+
+    return $injector;
+}
+```
+
+Keep calling it only from the plugin entry points, passing the injector around would turn it into a Service Locator.
+
+## Advanced Patterns
+
+### Variadic dependencies
+
+Auryn does not build a list for variadic parameters such as `Repository ...$repositories`. Use a delegate or an
+object that collects the dependencies, both described in
+[Excluded features](excluded_features.md#variadic-dependencies).
+
+### Context objects and multiple instances of the same type
+
+Sometimes a class needs many instances of the same type, for example a job that moves data from the live database
+to the archive database:
+
+```php
+class DataArchiver
+{
+    public function __construct(private PDO $liveDb, private PDO $archiveDb)
+    {
+    }
+}
+```
+
+For small projects, more specific types work, each one created by its own delegate:
+
+```php
+class LivePDO extends PDO {}
+class ArchivePDO extends PDO {}
+
+class DataArchiver
+{
+    public function __construct(private LivePDO $liveDb, private ArchivePDO $archiveDb)
+    {
+    }
+}
+```
+
+For larger projects the [Encapsulate Context](https://www.allankelly.net/static/patterns/encapsulatecontext.pdf)
+pattern scales better: a specific type holds everything a business problem needs, and it is wired explicitly.
+
+```php
+final class DataArchiverContext
+{
+    public function __construct(private PDO $liveDb, private PDO $archiveDb)
+    {
+    }
+
+    public function liveDb(): PDO
+    {
+        return $this->liveDb;
+    }
+
+    public function archiveDb(): PDO
+    {
+        return $this->archiveDb;
+    }
+}
+
+class DataArchiver
+{
+    public function __construct(private DataArchiverContext $context)
+    {
+    }
+}
+
+$injector->delegate(
+    DataArchiverContext::class,
+    static fn(): DataArchiverContext => new DataArchiverContext(createLiveDb(), createArchiveDb())
+);
+```
+
+With encapsulated contexts you can see where a context is used, which types it holds and how it is created, which
+makes large applications easier to maintain.
